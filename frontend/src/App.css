@@ -1,0 +1,79 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #1e1e2e;
+  color: #e0e0e0;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+#root {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+
+.message {
+  max-width: 70%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  line-height: 1.4;
+  margin: 0;
+}
+
+.message.student {
+  align-self: flex-end;
+  background-color: #4f6df5;
+  color: white;
+  border-bottom-right-radius: 4px;
+}
+
+.message.mentor {
+  align-self: flex-start;
+  background-color: #2e2e42;
+  color: #e0e0e0;
+  border-bottom-left-radius: 4px;
+}
+
+.input-bar {
+  display: flex;
+  gap: 8px;
+  padding: 10px 0;
+}
+
+.input-bar input {
+  flex: 1;
+  padding: 10px 14px;
+  border-radius: 20px;
+  border: 1px solid #3a3a52;
+  background-color: #2e2e42;
+  color: #e0e0e0;
+  outline: none;
+}
+
+.input-bar button {
+  padding: 10px 20px;
+  border-radius: 20px;
+  border: none;
+  background-color: #4f6df5;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.input-bar button:hover {
+  background-color: #3d58d9;
+}
