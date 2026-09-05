@@ -1,6 +1,7 @@
 import { useState } from "react" 
 import { useEffect } from 'react'
-import './App.css'  
+import './App.css' 
+const API_URL = "https://mentorflow-06w0.onrender.com"; 
 
 function App() {
   const [sessionId, setSessionId] = useState(null)
@@ -11,7 +12,7 @@ function App() {
 
   useEffect(() => { 
   async function createSession() {
-    const response = await fetch("http://localhost:3000/")
+    const response = await fetch(`${API_URL}/`)
     const data = await response.json()
     setSessionId(data.sessionId)
     setProblemTitle(data.title)
@@ -25,7 +26,7 @@ function App() {
   setMessages(updatedMessages)
   setInputText("")
 
-  const response = await fetch(`http://localhost:3000/session/${sessionId}/respond`, {
+  const response = await fetch(`${API_URL}/session/${sessionId}/respond`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ studentMessage: inputText })
