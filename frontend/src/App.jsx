@@ -39,8 +39,10 @@ function App() {
   return (
   <>
  <div className="chat-container">
+  <div className="problem-header">
   <h2>{problemTitle}</h2>
   <p>{problemDescription}</p>
+</div>
   {messages.map((msg, index) => (
     <p key={index} className={msg.sender === 'student' ? "message student" : "message mentor"}>{msg.text}</p>
   ))}

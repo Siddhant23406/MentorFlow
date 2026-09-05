@@ -77,3 +77,24 @@ body {
 .input-bar button:hover {
   background-color: #3d58d9;
 }
+
+.problem-header {
+  background-color: #2a2a3e;
+  border: 1px solid #3a3a52;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+
+.problem-header h2 {
+  margin: 0 0 8px 0;
+  color: #8ea2ff;
+  font-size: 1.2rem;
+}
+
+.problem-header p {
+  margin: 0;
+  color: #b0b0c0;
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
