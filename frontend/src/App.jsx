@@ -1,16 +1,21 @@
 import { useState } from "react" 
 import { useEffect } from 'react'
- import './App.css'  
+import './App.css'  
 
 function App() {
   const [sessionId, setSessionId] = useState(null)
   const [messages, setMessages] = useState([{ sender: "mentor", text: "Hi! Ready to work on a problem?" }])
   const [inputText, setInputText] = useState("")
-  useEffect(() => {
+  const [problemTitle, setProblemTitle] = useState("")
+  const [problemDescription, setProblemDescription] = useState("")
+
+  useEffect(() => { 
   async function createSession() {
     const response = await fetch("http://localhost:3000/")
     const data = await response.json()
     setSessionId(data.sessionId)
+    setProblemTitle(data.title)
+    setProblemDescription(data.description)
   }
   createSession()
 }, [])
@@ -34,6 +39,8 @@ function App() {
   return (
   <>
  <div className="chat-container">
+  <h2>{problemTitle}</h2>
+  <p>{problemDescription}</p>
   {messages.map((msg, index) => (
     <p key={index} className={msg.sender === 'student' ? "message student" : "message mentor"}>{msg.text}</p>
   ))}

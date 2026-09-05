@@ -1,4 +1,5 @@
 require('dotenv').config();
+const rateLimit = require('express-rate-limit');
 const crypto = require('crypto');
 const cors = require('cors')
 const { getProblemById, getRandomProblem } = require('./data/problems');
@@ -9,14 +10,24 @@ const { createSession , getSession, updateSessionState } = require("./models/ses
 const { DecisionType } = require("./engine/constants");
 const { decide } = require("./engine/decide");
 const { classifyMessage, validateClassification } = require('./llm/classify');
+const { title } = require('process');
 const app = express();
 app.use(cors())
 app.use(express.json());
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 30, // limit each IP to 30 requests per window
+  message: { error: "Too many requests, please try again later." }
+});
 
 app.get("/", (req,res) => {
     const problem = getRandomProblem();
     const session = createSession(crypto.randomUUID(), problem.id, problem.totalSteps);
-    res.json(session);
+    res.json({
+      ...session,
+      title: problem.title,
+      description: problem.description
+    });
 });
 
 app.get("/session/:id", (req,res) => {
@@ -25,7 +36,7 @@ app.get("/session/:id", (req,res) => {
     else return res.status(404).json({ error: "Session not found"});
 });
 
-app.post("/session/:id/respond", async (req, res) => {
+app.post("/session/:id/respond", limiter , async (req, res) => {
   const session = getSession(req.params.id);
   if (!session) return res.status(404).json({ error: "Session not found" });
   
