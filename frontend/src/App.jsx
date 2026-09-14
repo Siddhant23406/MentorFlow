@@ -1,7 +1,8 @@
 import { useState } from "react" 
 import { useEffect } from 'react'
 import './App.css' 
-const API_URL = "https://mentorflow-06w0.onrender.com"; 
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 function App() {
   const [sessionId, setSessionId] = useState(null)
@@ -52,6 +53,11 @@ function App() {
   <input
     value={inputText}
     onChange={(e) => setInputText(e.target.value)}
+    onKeyDown={(e) => {
+    if (e.key === "Enter") {
+      handleSend();
+    }
+  }}
   />
   <button onClick={handleSend}>Send</button>
 </div>

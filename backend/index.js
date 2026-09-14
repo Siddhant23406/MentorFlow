@@ -20,6 +20,10 @@ const limiter = rateLimit({
   message: { error: "Too many requests, please try again later." }
 });
 
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
+
 app.get("/", (req,res) => {
     const problem = getRandomProblem();
     const session = createSession(crypto.randomUUID(), problem.id, problem.totalSteps);
