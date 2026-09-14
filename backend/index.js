@@ -21,6 +21,7 @@ const limiter = rateLimit({
 });
 
 app.get("/health", (req, res) => {
+  console.log("Health check ping received");
   res.status(200).send("OK");
 });
 
