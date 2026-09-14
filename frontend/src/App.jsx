@@ -1,5 +1,4 @@
-import { useState } from "react" 
-import { useEffect } from 'react'
+import { useState, useEffect, useRef } from "react" 
 import './App.css' 
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -10,6 +9,11 @@ function App() {
   const [inputText, setInputText] = useState("")
   const [problemTitle, setProblemTitle] = useState("")
   const [problemDescription, setProblemDescription] = useState("")
+  const messagesEndRef = useRef(null)
+
+  useEffect(() => {
+  messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages])
 
   useEffect(() => { 
   async function createSession() {
@@ -48,7 +52,9 @@ function App() {
   {messages.map((msg, index) => (
     <p key={index} className={msg.sender === 'student' ? "message student" : "message mentor"}>{msg.text}</p>
   ))}
+<div ref={messagesEndRef} />
 </div>
+
 <div className="input-bar">
   <input
     value={inputText}
