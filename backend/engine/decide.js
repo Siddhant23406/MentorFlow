@@ -35,6 +35,11 @@ function decide (state, classification)
         return DecisionType.REDIRECT_DODGE;
     }
 
+    else if(classification === Classification.READY_CONFIRM)
+    {
+        return DecisionType.ASK_GUIDING_QUESTION;
+    }
+
     else if(classification === Classification.ON_TOPIC_ATTEMPT)
     {
         return DecisionType.ASK_GUIDING_QUESTION;

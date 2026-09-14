@@ -17,6 +17,7 @@ const Classification = Object.freeze({
     DODGE: 'dodge',
     STUCK: 'stuck',
     OFF_TOPIC: 'off-topic',
+    READY_CONFIRM: 'ready-confirm',
 });
 
 const HintLevels = Object.freeze({
