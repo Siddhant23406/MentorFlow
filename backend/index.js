@@ -1,4 +1,5 @@
 require('dotenv').config();
+const { initDb } = require('./db');
 const rateLimit = require('express-rate-limit');
 const crypto = require('crypto');
 const cors = require('cors')
@@ -25,9 +26,9 @@ app.get("/health", (req, res) => {
   res.status(200).send("OK");
 });
 
-app.get("/", (req,res) => {
+app.get("/", async (req,res) => {
     const problem = getRandomProblem();
-    const session = createSession(crypto.randomUUID(), problem.id, problem.totalSteps);
+    const session = await createSession(crypto.randomUUID(), problem.id, problem.totalSteps);
     res.json({
       ...session,
       title: problem.title,
@@ -35,14 +36,14 @@ app.get("/", (req,res) => {
     });
 });
 
-app.get("/session/:id", (req,res) => {
-    const session = getSession(req.params.id);
+app.get("/session/:id", async (req,res) => {
+    const session = await getSession(req.params.id);
     if(session) return res.json(session);
     else return res.status(404).json({ error: "Session not found"});
 });
 
 app.post("/session/:id/respond", limiter , async (req, res) => {
-  const session = getSession(req.params.id);
+  const session = await getSession(req.params.id);
   if (!session) return res.status(404).json({ error: "Session not found" });
   
   const { studentMessage } = req.body;
@@ -71,12 +72,18 @@ app.post("/session/:id/respond", limiter , async (req, res) => {
     responseText = await generateMentorResponse(decision, problemDescription, studentMessage, session.state.hintLevel);
   }
 
-  const updatedSession = updateSessionState(session.sessionId, changes);
+  const updatedSession = await updateSessionState(session.sessionId, changes);
   res.json({ decision, response: responseText, session: updatedSession });
 
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+
+async function startServer() {
+  await initDb();
+  app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
-});
+  });
+}
+
+startServer();

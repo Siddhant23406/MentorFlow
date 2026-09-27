@@ -1,17 +1,21 @@
-const Database = require('better-sqlite3');
+const { Pool } = require('pg');
 
-const db = new Database('mentorflow.db');
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+});
 
-db.exec(`
-  CREATE TABLE IF NOT EXISTS sessions (
-    session_id TEXT PRIMARY KEY,
-    problem_id TEXT NOT NULL,
-    solved INTEGER DEFAULT 0,
-    hint_level INTEGER DEFAULT 0,
-    dodge_count INTEGER DEFAULT 0,
-    current_step INTEGER NOT NULL,
-    total_steps INTEGER NOT NULL
-  )
-`);
+async function initDb() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS sessions (
+      session_id TEXT PRIMARY KEY,
+      problem_id TEXT NOT NULL,
+      solved BOOLEAN DEFAULT FALSE,
+      hint_level INTEGER DEFAULT 0,
+      dodge_count INTEGER DEFAULT 0,
+      current_step INTEGER NOT NULL,
+      total_steps INTEGER NOT NULL
+    )
+  `);
+}
 
-module.exports = db;
+module.exports = { pool, initDb };
