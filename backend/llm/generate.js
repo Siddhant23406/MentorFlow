@@ -1,3 +1,4 @@
+const { withRetry } = require('../utils/withRetry');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { DecisionType } = require('../engine/constants');
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -43,7 +44,7 @@ Clearly explain the solution and approach, including the reasoning behind it, in
             instruction = `${PERSONALITY} Respond helpfully to the student.`;
     }
 
-    const result = await model.generateContent(instruction);
+    const result = await withRetry(() => model.generateContent(instruction));
     const responseText = result.response.text();
     return responseText;
 }

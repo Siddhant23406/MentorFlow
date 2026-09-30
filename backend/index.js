@@ -11,7 +11,6 @@ const { createSession , getSession, updateSessionState } = require("./models/ses
 const { DecisionType } = require("./engine/constants");
 const { decide } = require("./engine/decide");
 const { classifyMessage, validateClassification } = require('./llm/classify');
-const { title } = require('process');
 const app = express();
 app.use(cors())
 app.use(express.json());
@@ -43,39 +42,55 @@ app.get("/session/:id", async (req,res) => {
 });
 
 app.post("/session/:id/respond", limiter , async (req, res) => {
-  const session = await getSession(req.params.id);
-  if (!session) return res.status(404).json({ error: "Session not found" });
   
-  const { studentMessage } = req.body;
-  const problem = getProblemById(session.problemId);
-  const problemDescription = problem.description;
-  const rawOutput = await classifyMessage(problemDescription, studentMessage);
-  const classification = validateClassification(rawOutput);
-  const decision = decide(session.state, classification);
+  try{
 
-  let changes = {};
-  if (decision === DecisionType.GIVE_HINT) {
-    changes = { hintLevel: session.state.hintLevel + 1 };
-  } else if (decision === DecisionType.REDIRECT_DODGE) {
-    changes = { dodgeCount: session.state.dodgeCount + 1 };
-  } else if (decision === DecisionType.ACKNOWLEDGE_PROGRESS) {
-    changes = { currentStep: session.state.currentStep + 1 };
-  }
-
-  let responseText;
-  if (decision === DecisionType.ACKNOWLEDGE_PROGRESS || decision === DecisionType.CELEBRATE_COMPLETION) {
-    responseText = getTemplateResponse(decision);
-    if(decision === DecisionType.CELEBRATE_COMPLETION) {
-      session.solved = true;
+    const session = await getSession(req.params.id);
+    if (!session) return res.status(404).json({ error: "Session not found" });
+    
+    const { studentMessage } = req.body;
+    if (!studentMessage || typeof studentMessage !== 'string' || studentMessage.trim().length === 0) {
+      return res.status(400).json({ error: "studentMessage is required and cannot be empty" });
     }
-  } else {
-    responseText = await generateMentorResponse(decision, problemDescription, studentMessage, session.state.hintLevel);
-  }
 
-  const updatedSession = await updateSessionState(session.sessionId, changes);
-  res.json({ decision, response: responseText, session: updatedSession });
+    if (studentMessage.length > 2000) {
+      return res.status(400).json({ error: "studentMessage is too long (max 2000 characters)" });
+    } 
+    console.log(`[${new Date().toISOString()}] Session ${req.params.id} | Message: "${studentMessage.slice(0, 80)}"`);
+    const problem = getProblemById(session.problemId);
+    const problemDescription = problem.description;
+    const rawOutput = await classifyMessage(problemDescription, studentMessage);
+    const classification = validateClassification(rawOutput);
+    const decision = decide(session.state, classification);
 
-});
+    let changes = {};
+    if (decision === DecisionType.GIVE_HINT) {
+      changes = { hintLevel: session.state.hintLevel + 1 };
+    } else if (decision === DecisionType.REDIRECT_DODGE) {
+      changes = { dodgeCount: session.state.dodgeCount + 1 };
+    } else if (decision === DecisionType.ACKNOWLEDGE_PROGRESS) {
+      changes = { currentStep: session.state.currentStep + 1 };
+    }
+
+    let responseText;
+    if (decision === DecisionType.ACKNOWLEDGE_PROGRESS || decision === DecisionType.CELEBRATE_COMPLETION) {
+      responseText = getTemplateResponse(decision);
+      if(decision === DecisionType.CELEBRATE_COMPLETION) {
+        session.solved = true;
+      }
+    } else {
+      responseText = await generateMentorResponse(decision, problemDescription, studentMessage, session.state.hintLevel);
+    }
+
+    const updatedSession = await updateSessionState(session.sessionId, changes);
+    console.log(`[${new Date().toISOString()}] Session ${req.params.id} | Decision: ${decision}`);
+    res.json({ decision, response: responseText, session: updatedSession });
+
+    } catch (err) {
+      console.error(`[${new Date().toISOString()}] Session ${req.params.id} | Error:`, err.message);
+      res.status(500).json({ error: "The mentor is having trouble right now. Please try again in a moment." });
+    }
+  });
 
 const PORT = process.env.PORT || 3000;
 

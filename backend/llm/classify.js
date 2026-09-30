@@ -3,6 +3,7 @@ require('dotenv').config();
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash-lite" });
+const { withRetry } = require('../utils/withRetry');
 
 async function classifyMessage(problemDescription, studentMessage) {
   const prompt = `You are a classifier for a coding mentor app. Given a student's message, output exactly one label from this list: on-topic-attempt, correct-answer, dodge, stuck, off-topic, ready-confirm
@@ -20,7 +21,7 @@ Student's message: "${studentMessage}"
 Respond with ONLY the label. No punctuation, no explanation, no extra words.
 Label:`;
 
-  const result = await model.generateContent(prompt);
+  const result = await withRetry(() => model.generateContent(prompt));
   const rawOutput = result.response.text();
 
   return rawOutput;
